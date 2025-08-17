@@ -1,0 +1,138 @@
+:root {
+  --color-primary: #2563eb;   /* azul principal */
+  --color-secondary: #60a5fa; /* azul claro */
+  --color-bg: #1e293b;        /* fondo oscuro */
+  --color-card: #334155;      /* tarjetas */
+  --color-text: #f1f5f9;      /* texto */
+  --color-hover: #1e40af;     /* hover */
+  
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Links */
+a {
+  font-weight: 500;
+  color: var(--color-secondary);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--color-primary);
+}
+
+/* Body */
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 500px;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+/* Botones */
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+button:hover {
+  background-color: var(--color-hover);
+  transform: scale(1.05);
+}
+button:focus,
+button:focus-visible {
+  outline: 3px solid var(--color-secondary);
+}
+
+/* ============================
+   Tarjetas en grid
+============================ */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-secondary);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  transition: transform 0.2s ease, background 0.3s ease;
+  color: var(--color-text);
+}
+
+.card:hover {
+  transform: scale(1.05);
+  background: var(--color-primary);
+}
+
+/* Imagen dentro de la card */
+#imagen-card {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+}
+
+/* ============================
+   Formulario centrado y al 100%
+============================ */
+#formulario-input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 40px auto;
+  width: 100%;
+  max-width: 800px;
+  background-color: var(--color-card);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--color-secondary);
+}
+
+/* Input a ancho completo */
+#inputsito {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid var(--color-secondary);
+  border-radius: 12px;
+  outline: none;
+  background: #f9fafb;
+  color: #111827;
+  transition: all 0.3s ease;
+}
+
+#inputsito:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.6);
+}
+
+#boton-descarga{
+  padding: 10px 40px 10px 40px;
+  background-color: rgb(110, 137, 226);
+  border-radius: 5px;
+  color: #fff;
+}
