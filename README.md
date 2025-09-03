@@ -4,6 +4,8 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/KeinerAstos/gif-react-ec2?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/KeinerAstos/gif-react-ec2?style=flat-square)
 ![GitHub license](https://img.shields.io/github/license/KeinerAstos/gif-react-ec2?style=flat-square)
+![GitHub Actions Workflow Status](https://github.com/KeinerAstos/gif-react-ec2/actions/workflows/main.yml/badge.svg)
+
 
 Aplicación React para buscar y mostrar GIFs usando la API de Giphy, desplegada en un servidor **AWS EC2** con **Nginx**.
 
