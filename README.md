@@ -426,9 +426,46 @@ git pull origin main
 
 Observamos que el Badge aparece en estado Passing ya que todo quedó correcto
 
-
+---
 ## Containerización con Docker
-Preparar el entorno desde la terminal 
+---
+
+## PASOS A SEGUIR 
+
+### PASO 1 
+
+Crear un archivo llamado Dockerfile con las siguientes lineas de codigo dentro del mismo : 
+```
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+
+
+```
+
+### PASO 2 
+
+Crear un archivo llamado .dockerignore con las siguientes lineas de codigo en el mismo :
+
+```
+
+node_modules
+.git
+.env
+*.md
+.github
+tests
+
+```
+
+### Preparar el entorno desde la terminal 
 ejecutamos el siguiente comando:
 ``` 
  docker build -t git-app-react .
@@ -455,40 +492,8 @@ npm install
 ```
 ya que en ocasiones el archivo packege.json tiene que volver a crearse de nuevo con las dependenciasa correctas y descargando las actualizaciones correspondientes, donde despues de eliminarla se ejecuta nuevamente npm install y por ultimo el docker para construir un images con el proyecto 
 
-### PASOS A SEGUIR 
+### PASO 3
 
-PASO 1 
-
-Crear un archivo llamado Dockerfile con las siguientes lineas de codigo dentro del mismo : 
-```
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
-
-
-```
-
-PASO 2 
-Crear un archivo llamado .dockerignore con las siguientes lineas de codigo en el mismo :
-
-```
-
-node_modules
-.git
-.env
-*.md
-.github
-tests
-
-```
-PASO 3
 ejecutamos dentro de la terminal el siguiente comando: 
 
 ```
