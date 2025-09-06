@@ -4,7 +4,7 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/KeinerAstos/gif-react-ec2?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/KeinerAstos/gif-react-ec2?style=flat-square)
 ![GitHub Actions Workflow Status](https://github.com/KeinerAstos/gif-react-ec2/actions/workflows/main.yml/badge.svg)
-
+![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
 
 Aplicación React para buscar y mostrar GIFs usando la API de Giphy, desplegada en un servidor **AWS EC2** con **Nginx**.
 
@@ -425,3 +425,72 @@ git pull origin main
 ### 6. OBSERVAR 
 
 Observamos que el Badge aparece en estado Passing ya que todo quedó correcto
+
+
+## Containerización con Docker
+Preparar el entorno desde la terminal 
+ejecutamos el siguiente comando:
+``` 
+ docker build -t git-app-react .
+```
+donde si te sale este error: 
+```
+ 1 warning found (use docker --debug to expand):
+ - FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 1)
+Dockerfile:6
+--------------------
+   4 |     RUN npm install
+   5 |     COPY . .
+   6 | >>> RUN npm run build
+   7 |     FROM nginx:alpine
+   8 |     COPY --from=builder /app/build /usr/share/nginx/html
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+```
+ejecuta el siguiente comando:
+```
+Remove-Item -Recurse -Force node_modules, package-lock.json
+npm install
+ docker build -t git-app-react .
+```
+ya que en ocasiones el archivo packege.json tiene que volver a crearse de nuevo con las dependenciasa correctas y descargando las actualizaciones correspondientes, donde despues de eliminarla se ejecuta nuevamente npm install y por ultimo el docker para construir un images con el proyecto 
+
+### PASOS A SEGUIR 
+
+PASO 1 
+
+Crear un archivo llamado Dockerfile con las siguientes lineas de codigo dentro del mismo : 
+```
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+
+
+```
+
+PASO 2 
+Crear un archivo llamado .dockerignore con las siguientes lineas de codigo en el mismo :
+
+```
+
+node_modules
+.git
+.env
+*.md
+.github
+tests
+
+```
+PASO 3
+ejecutamos dentro de la terminal el siguiente comando: 
+
+```
+docker run -d -p 8080:80 --name git-app-react-container git-app-react
+```
