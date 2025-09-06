@@ -3,8 +3,14 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/KeinerAstos/gif-react-ec2?style=flat-square)
 ![GitHub contributors](https://img.shields.io/github/contributors/KeinerAstos/gif-react-ec2?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/KeinerAstos/gif-react-ec2?style=flat-square)
+<<<<<<< HEAD
 ![GitHub license](https://img.shields.io/github/license/KeinerAstos/gif-react-ec2?style=flat-square)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
+=======
+![GitHub Actions Workflow Status](https://github.com/KeinerAstos/gif-react-ec2/actions/workflows/main.yml/badge.svg)
+
+
+>>>>>>> b90db0b96dece598e5aa021d51f03a6bd99cf114
 Aplicación React para buscar y mostrar GIFs usando la API de Giphy, desplegada en un servidor **AWS EC2** con **Nginx**.
 
 ---
@@ -108,6 +114,7 @@ Si ya estaba clonado:
 ```bash
 git pull origin main
 ```
+el pull lo que hace es descargar las nuevas actualizaciones que fueron cargadas en el repostiorio con el fin de realizar un consolidado del proyecto 
 
 ---
 
@@ -117,6 +124,7 @@ git pull origin main
 rm -rf node_modules package-lock.json
 npm install
 ```
+Eliminamos el archivo packege-lock.json con el fin de volver a cargarlo en el siguiente paso y que no cause ningun error si se quiere correr el original
 
 ---
 
@@ -130,13 +138,25 @@ npm run build
 
 **Problema frecuente:**
 
-* Error `Cannot find module @rollup/rollup-linux-x64-gnu` al ejecutar `npm run build`.
-  **Solución:**
+Cuando intentamos compilar el proyecto, aparecía este error:
+```
+Error: Cannot find module '@rollup/rollup-linux-x64-gnu'
+Require stack:
+- ...
+```
 
-```bash
+📌 Causa:
+Este problema ocurre porque la instalación de dependencias queda corrupta o incompleta. Suele pasar con paquetes que dependen de binarios específicos según el sistema operativo, como rollup.
+
+✅ Solución
+
+Reinstalar las dependencias desde cero:
+```
 rm -rf node_modules package-lock.json
 npm install
 ```
+
+👉 Esto fuerza a npm a reconstruir todas las dependencias correctamente y resuelve el error.
 
 ---
 
@@ -150,13 +170,30 @@ sudo systemctl restart nginx
 
 * Ahora Nginx sirve la aplicación desde `/var/www/html`.
 
-**Problema frecuente:**
+### Problema frecuente: Carpeta dist no generada
+En algunos casos, al ejecutar comandos relacionados con la carpeta de distribución (dist), aparecía el error de que dist no existía.
 
-* `dist` no existía porque `npm run build` falló previamente.
-  **Solución:** Limpiar `node_modules` y `package-lock.json` y reinstalar dependencias.
+📌 Causa:
+Esto sucede porque el comando npm run build había fallado previamente debido a problemas con dependencias o configuración, por lo tanto nunca se generó la carpeta dist.
 
----
+✅ Solución
 
+Limpiar dependencias y archivos bloqueados:
+```
+rm -rf node_modules package-lock.json
+```
+
+Reinstalar dependencias:
+```
+npm install
+```
+
+Volver a ejecutar el build:
+```
+npm run build
+```
+
+👉 Esto garantiza que la carpeta dist se genere correctamente.
 ### 9️⃣ Verificar funcionamiento
 
 * Abrir en navegador: `http://<IP_PUBLICA>/`
@@ -225,5 +262,173 @@ sudo systemctl restart nginx
 ```
 
 ---
+## Automatización con GitHub Actions
+
+---
+## 🛠 Configuración de pruebas
+
+### 1. Creación del archivo de test
+
+Se creó un archivo de prueba `src/test-app.test.jsx` para el componente principal `GifExpertApp`:
+
+```jsx
+import { render, screen } from '@testing-library/react';
+import { GifExpertApp } from './GifExpertApp';
+
+test('renders without crashing', () => {
+  render(<GifExpertApp />);
+});
+
+test('contains expected text', () => {
+  render(<GifExpertApp />);
+  const element = screen.getByText(/welcome/i); // Ajusta al texto real de tu componente
+  expect(element).toBeInTheDocument();
+});
+```
+Recordar que es importante que el archivo quede como (.test.jsx) ya que es importante al momento de ejecutar el commit en github actions ya que busca un archivo .test
+
+### 2. Configuración de Jest
+Modificar el archivo jest.config.js ->> jest.config.cjs con la misma información
+
+Se crea jest.config.cjs en la raíz del proyecto:
+```
+module.exports = {
+  testEnvironment: "jsdom",
+  setupFiles: ["./jest.setup.js"],
+  moduleNameMapper: {
+    "\\.(css|less|scss|sass)$": "<rootDir>/__mocks__/styleMock.js",
+    "\\.(gif|ttf|eot|svg|png|jpg|jpeg)$": "<rootDir>/__mocks__/fileMock.js"
+  },
+  transformIgnorePatterns: ["/node_modules/"],
+  collectCoverage: false
+};
+```
+
+
+Se crearon mocks para archivos estáticos:
+
+__mocks__/styleMock.js:
+```
+
+module.exports = {};
+
+```
+
+__mocks__/fileMock.js:
+```
+
+module.exports = "test-file-stub";
+```
+
+
+Y el archivo jest.setup.js quedó así:
+```
+
+import "whatwg-fetch";
+```
+
+
+🔹 Esto permite que Jest ignore CSS y assets como imágenes y fuentes, evitando errores en los tests.
+
+### 3. Configuración de Babel
+
+Debido a que el proyecto está en ES Modules ("type": "module" en package.json), se renombró la configuración de Babel a CommonJS:
+- Modificar el archivo babel.config.js -> babel.config.cjs
+Archivo babel.config.cjs:
+```
+
+module.exports = {
+  presets: [
+    ['@babel/preset-env', { targets: { esmodules: true } }],
+    ['@babel/preset-react', { runtime: 'automatic' }],
+  ],
+};
+```
+
+
+⚠️ Esto solucionó error:
+ReferenceError: module is not defined in ES module scope
+
+### 4. Configuración de GitHub Actions
+
+Archivo .github/workflows/main.yml:
+```
+
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests with Jest
+        run: npm test -- --watchAll=false
+
+```
+
+🔹 Este workflow ejecuta automáticamente los tests cada vez que hay un push o pull request en main.
+
+### 5. Errores encontrados y soluciones
+
+### Error: Errores al importar CSS/FontAwesome en Jest
+Cuando corríamos los tests, aparecía un error parecido a este:
+```
+FAIL src/app.test.js
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    /node_modules/@fortawesome/fontawesome-free/css/all.min.css:6
+    .fa,.fa-brands,.fa-classic { ... }
+    ^
+
+    SyntaxError: Unexpected token '.'
+
+    > 1 | import "@fortawesome/fontawesome-free/css/all.min.css";
+        | ^
+
+```
+📌 Causa:
+Jest no interpreta archivos .css, .scss, imágenes, fuentes ni otros assets estáticos. Al encontrarse con un import "@fortawesome/fontawesome-free/css/all.min.css";, lo toma como JavaScript y falla.
+
+✅ Solución
+
+Creamos mocks para que Jest “ignore” donde se nombran en el PASO NUMERO 2
+
+### Errores en Git al hacer push
+```
+git pull
+error: You have not concluded your merge (MERGE_HEAD exists).
+hint: Please, commit your changes before merging.
+fatal: Exiting because of unfinished merge.
+
+```
+la solución es hacer un pull integrando las actulizaciones montadas en el github a nuestro local para poder hacer un push con todo integrado
+```
+git add .
+git commit -m "fix: concluir merge con actualizaciones del repo"
+git pull origin main
+```
+
+### 6. OBSERVAR 
+
+Observamos que el Badge aparece en estado Passing ya que todo quedó correcto
 
 
